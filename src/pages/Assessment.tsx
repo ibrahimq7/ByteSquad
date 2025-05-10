@@ -1,9 +1,16 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { useData } from "@/context/DataContext";
+import { useTheme } from "@/context/ThemeContext";
+import { cn } from "@/lib/utils";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 // Define the assessment questions
 const questions = [
@@ -80,30 +87,92 @@ const questions = [
 ];
 
 const Assessment = () => {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+  const { toast } = useToast();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ questionId: number; score: number }[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [result, setResult] = useState<{
     score: number;
     level: 'Low Stress' | 'Mild Stress' | 'Moderate Stress' | 'High Stress' | 'Severe Stress';
     message: string;
     tips: string[];
+    recommendedTask: {
+      id: number;
+      title: string;
+      description: string;
+      type: 'breathing' | 'gratitude' | 'meditation' | 'affirmation';
+    };
   } | null>(null);
   
-  const { addAssessmentResult } = useData();
+  const { addAssessmentResult, dailyTasks } = useData();
   
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((currentQuestionIndex) / questions.length) * 100;
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
   
-  const handleAnswer = (score: number) => {
-    const newAnswers = [...answers, { questionId: currentQuestion.id, score }];
+  // Mark as onboarded when test is completed
+  useEffect(() => {
+    if (isCompleted) {
+      localStorage.setItem('isOnboarded', 'true');
+    }
+  }, [isCompleted]);
+
+  const handleNextQuestion = () => {
+    if (selectedOption === null) {
+      toast({
+        title: "Please select an option",
+        description: "You need to select an answer to continue.",
+      });
+      return;
+    }
+
+    const newAnswers = [...answers, { questionId: currentQuestion.id, score: selectedOption }];
     setAnswers(newAnswers);
     
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setSelectedOption(null); // Reset selection for next question
     } else {
       completeAssessment(newAnswers);
     }
+  };
+  
+  const handlePrevQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      // Remove the last answer
+      const previousAnswers = [...answers];
+      previousAnswers.pop();
+      setAnswers(previousAnswers);
+      // Set the previous selection
+      const previousAnswer = answers[answers.length - 1];
+      setSelectedOption(previousAnswer?.score || null);
+    }
+  };
+
+  const getRecommendedTask = (level: string) => {
+    let taskType: 'breathing' | 'gratitude' | 'meditation' | 'affirmation' = 'breathing';
+    
+    switch (level) {
+      case 'High Stress':
+      case 'Severe Stress':
+        taskType = 'breathing';
+        break;
+      case 'Moderate Stress':
+        taskType = 'meditation';
+        break;
+      case 'Mild Stress':
+        taskType = 'gratitude';
+        break;
+      default:
+        taskType = 'affirmation';
+    }
+    
+    // Find a task of the appropriate type
+    const tasksOfType = dailyTasks.filter(task => task.id.toString().includes(taskType));
+    return tasksOfType.length > 0 ? tasksOfType[0] : dailyTasks[0];
   };
 
   const completeAssessment = (finalAnswers: { questionId: number; score: number }[]) => {
@@ -163,11 +232,15 @@ const Assessment = () => {
       ];
     }
     
+    // Find a recommended task based on stress level
+    const recommendedTask = getRecommendedTask(level);
+    
     const resultData = {
       score: totalScore,
       level,
       message,
-      tips
+      tips,
+      recommendedTask
     };
     
     setResult(resultData);
@@ -181,91 +254,160 @@ const Assessment = () => {
     });
   };
 
+  const handleViewResult = () => {
+    navigate('/assessment-result', { state: { result } });
+  };
+
   const resetAssessment = () => {
     setCurrentQuestionIndex(0);
     setAnswers([]);
     setIsCompleted(false);
     setResult(null);
+    setSelectedOption(null);
   };
 
   return (
-    <div className="container max-w-2xl mx-auto px-4 py-8 pb-20">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Mental Wellness Assessment</h1>
+    <div className={cn("container max-w-2xl mx-auto px-4 py-8 pb-20",
+      theme === 'dark' ? 'text-gray-100' : '')}>
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+        Mental Health Test
+      </h1>
       
       {!isCompleted ? (
-        <Card className="shadow-md border-mindease-purple/20 animate-fade-in">
+        <Card className={cn("shadow-md border-mindease-purple/20 animate-fade-in",
+          theme === 'dark' ? 'bg-gray-800 border-gray-700' : '')}>
           <CardHeader>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-gray-500">Question {currentQuestionIndex + 1} of {questions.length}</span>
+              <span className={cn("text-sm", theme === 'dark' ? 'text-gray-300' : 'text-gray-500')}>
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </span>
               <span className="text-sm font-medium">{Math.round(progress)}%</span>
             </div>
             <Progress value={progress} className="h-2" />
-            <CardTitle className="mt-4 text-xl">{currentQuestion.question}</CardTitle>
+            <CardTitle className={cn("mt-4 text-xl",
+              theme === 'dark' ? 'text-white' : '')}>
+              {currentQuestion.question}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 quiz-transition">
+            <RadioGroup 
+              className="space-y-3 quiz-transition"
+              value={selectedOption?.toString()}
+              onValueChange={(value) => setSelectedOption(parseInt(value))}
+            >
               {currentQuestion.options.map((option) => (
-                <Button
-                  key={option.value}
-                  variant="outline"
-                  className="w-full justify-start text-left py-6 px-4 hover:bg-mindease-purple/10 hover:border-mindease-purple/30 transition-all"
-                  onClick={() => handleAnswer(option.value)}
-                >
-                  {option.label}
-                </Button>
+                <div key={option.value} className={cn(
+                  "flex items-center p-4 rounded-lg",
+                  theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50',
+                  selectedOption === option.value && (
+                    theme === 'dark' ? 'bg-gray-700' : 'bg-mindease-purple/10'
+                  )
+                )}>
+                  <RadioGroupItem 
+                    value={option.value.toString()} 
+                    id={`option-${option.value}`}
+                  />
+                  <Label 
+                    htmlFor={`option-${option.value}`}
+                    className={cn("ml-2 flex-1", theme === 'dark' ? 'text-gray-100' : '')}
+                  >
+                    {option.label}
+                  </Label>
+                </div>
               ))}
-            </div>
+            </RadioGroup>
           </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button
+              variant="ghost"
+              onClick={handlePrevQuestion}
+              disabled={currentQuestionIndex === 0}
+              className={theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : ''}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <Button onClick={handleNextQuestion}>
+              {currentQuestionIndex === questions.length - 1 ? (
+                <>
+                  Finish Test
+                  <Check className="h-4 w-4 ml-2" />
+                </>
+              ) : (
+                <>
+                  Next
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              )}
+            </Button>
+          </CardFooter>
         </Card>
       ) : (
         <div className="space-y-6 animate-fade-in">
-          <Card className="shadow-md overflow-hidden">
+          <Card className={cn("shadow-md overflow-hidden",
+            theme === 'dark' ? 'bg-gray-800 border-gray-700' : '')}>
             <div className={`h-2 ${result?.level === 'Low Stress' ? 'bg-green-500' : 
               result?.level === 'Mild Stress' ? 'bg-blue-500' :
               result?.level === 'Moderate Stress' ? 'bg-yellow-500' :
               result?.level === 'High Stress' ? 'bg-orange-500' : 'bg-red-500'}`} 
             />
             <CardHeader>
-              <CardTitle className="text-center text-2xl">Your Results</CardTitle>
-              <CardDescription className="text-center">
+              <CardTitle className={cn("text-center text-2xl",
+                theme === 'dark' ? 'text-white' : '')}>
+                Your Results
+              </CardTitle>
+              <CardDescription className={cn("text-center",
+                theme === 'dark' ? 'text-gray-300' : '')}>
                 Assessment completed on {new Date().toLocaleDateString()}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="text-center">
-                <span className="text-5xl font-bold inline-block p-4 rounded-full bg-gray-100">
+                <span className={cn("text-5xl font-bold inline-block p-4 rounded-full",
+                  theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100')}>
                   {result?.level === 'Low Stress' ? '😊' : 
                    result?.level === 'Mild Stress' ? '🙂' :
                    result?.level === 'Moderate Stress' ? '😐' :
                    result?.level === 'High Stress' ? '😥' : '😰'}
                 </span>
-                <h3 className="text-xl font-bold mt-4">{result?.level}</h3>
-                <p className="mt-2 text-gray-600">{result?.message}</p>
+                <h3 className={cn("text-xl font-bold mt-4",
+                  theme === 'dark' ? 'text-white' : '')}>
+                  {result?.level}
+                </h3>
+                <p className={cn("mt-2", theme === 'dark' ? 'text-gray-300' : 'text-gray-600')}>
+                  {result?.message}
+                </p>
               </div>
               
-              <div className="mt-6 pt-6 border-t">
-                <h4 className="font-bold">Suggested next steps:</h4>
-                <ul className="mt-3 space-y-2">
-                  {result?.tips.map((tip, index) => (
-                    <li key={index} className="flex">
-                      <span className="text-green-600 mr-2">✓</span>
-                      {tip}
-                    </li>
-                  ))}
-                </ul>
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <h4 className={cn("font-bold", theme === 'dark' ? 'text-white' : '')}>
+                  We've prepared a personalized report and activity for you:
+                </h4>
+                
+                <div className="mt-4 space-y-4">
+                  <Button 
+                    className="w-full"
+                    onClick={handleViewResult}
+                  >
+                    View Detailed Report
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={resetAssessment}
+                    className={cn("w-full", 
+                      theme === 'dark' ? 'border-gray-700 hover:bg-gray-700' : '')}
+                  >
+                    Retake Test
+                  </Button>
+                </div>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button 
-                onClick={resetAssessment} 
-                className="w-full"
-              >
-                Take Assessment Again
-              </Button>
-            </CardFooter>
           </Card>
           
-          <div className="text-center text-sm text-gray-500">
+          <div className={cn("text-center text-sm", 
+            theme === 'dark' ? 'text-gray-400' : 'text-gray-500')}>
             <p>Note: This assessment is for informational purposes only and is not a diagnostic tool.</p>
             <p className="mt-1">If you're experiencing severe distress, please seek professional help immediately.</p>
           </div>
