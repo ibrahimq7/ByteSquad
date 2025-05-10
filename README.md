@@ -60,6 +60,7 @@ Many people struggle with tracking their mental health and don’t have access t
 MindEase is also available as an **Android app** (converted from the web version):
 
 👉 **[Download Android APK](https://github.com/ibrahimq7/mindease-wellness-journey/blob/main/app-apk-681f19e38518b-1746868707%20(1).apk)**
+Next, click on more file action button then click on download.
 
 ### To install the APK:
 1. Download the APK file on your Android device.
