@@ -1,8 +1,9 @@
 
-import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
+import { ReactNode, useEffect } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -14,6 +15,17 @@ const ProtectedRoute = ({
   redirectTo = '/signin' 
 }: ProtectedRouteProps) => {
   const { currentUser, loading } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    if (!loading && !currentUser) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to access this page.",
+      });
+    }
+  }, [loading, currentUser, toast]);
   
   if (loading) {
     return (

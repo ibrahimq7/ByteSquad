@@ -2,16 +2,24 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 const NotFound = () => {
   const location = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
-  }, [location.pathname]);
+    
+    toast({
+      title: "Page Not Found",
+      description: "The page you're looking for doesn't exist.",
+      variant: "destructive",
+    });
+  }, [location.pathname, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-mindease-blue/30 to-white p-4">
