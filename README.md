@@ -1,73 +1,81 @@
-# Welcome to your Lovable project
+# 🧠 MindEase – Wellness Journey
 
-## Project info
+**MindEase** is a mental health web application designed to help users assess, track, and improve their mental well-being. It provides self-assessment tools, mood tracking, journaling, and curated resources — all wrapped in a clean, user-friendly interface.
 
-**URL**: https://lovable.dev/projects/71c50d5a-e210-4261-a3be-0ff11db7506d
+Originally developed as a web server application, **MindEase** has also been packaged into an Android APK to support mobile use.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 💡 What Is This App?
 
-**Use Lovable**
+**MindEase** is your personal mental wellness companion. It provides tools for:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/71c50d5a-e210-4261-a3be-0ff11db7506d) and start prompting.
+- Understanding emotional patterns through validated assessments
+- Logging moods and thoughts
+- Reflecting on daily experiences through journaling
+- Exploring helpful wellness articles and resources
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## ❓ The Problem It Solves
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Many people struggle with tracking their mental health and don’t have access to personal therapy or tools. MindEase solves this by:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Offering a **private, self-guided system** for emotional awareness
+- Making assessments like **PHQ-9 and GAD-7** easily accessible
+- Helping users identify **trends in their emotional well-being**
+- Delivering **mental health resources** in one central place
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## ✨ Features
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- ✅ **Email & Password Authentication**
+- 📋 **PHQ-9 and GAD-7 Assessments**
+- 😊 **Mood Tracker** with emoji logging and notes
+- 📓 **Journal Entries** with timestamp and mood tags
+- 📊 **Dashboard with Mood Trends**
+- 📚 **Curated Wellness Resources**
+- 🌓 **Dark/Light Mode**
+- 📱 **Android APK available**
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## ⚙️ Tech Stack
+
+| Layer        | Technology              |
+|--------------|--------------------------|
+| Frontend     | HTML, CSS, JavaScript    |
+| Framework    | Node.js, Express.js      |
+| Runtime      | Node.js                  |
+| Auth         | Firebase (Email/Password)|
+| Database     | Firestore (Firebase)     |
+| Charts       | Chart.js or similar      |
+| Deployment   | Web + Android APK (WebView)
+
+---
+
+## 📦 APK Download
+
+MindEase is also available as an **Android app** (converted from the web version):
+
+👉 **[Download Android APK](https://github.com/ibrahimq7/mindease-wellness-journey/blob/main/app-apk-681f19e38518b-1746868707%20(1).apk)**
+
+### To install the APK:
+1. Download the APK file on your Android device.
+2. Enable "Install from Unknown Sources" in your device settings.
+3. Open the APK file and install the app.
+
+---
+
+## 🚀 Getting Started (Development Setup)
+
+To run the project locally:
+
+### 🧑‍💻 Clone and Run
+
+```bash
+git clone https://github.com/ibrahimq7/mindease-wellness-journey.git
+cd mindease-wellness-journey
+npm install
 npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/71c50d5a-e210-4261-a3be-0ff11db7506d) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
