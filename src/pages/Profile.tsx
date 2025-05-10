@@ -7,9 +7,14 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { BarChart, Calendar } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useData } from "@/context/DataContext";
+import { format } from "date-fns";
 
 const Profile = () => {
   const { currentUser, updateProfile } = useAuth();
+  const { assessmentResults, moodEntries } = useData();
   const { toast } = useToast();
   
   const [isEditing, setIsEditing] = useState(false);
@@ -33,15 +38,26 @@ const Profile = () => {
       setIsSubmitting(false);
     }
   };
+  
+  // Get the most recent assessment
+  const recentAssessment = assessmentResults.length > 0 
+    ? assessmentResults[assessmentResults.length - 1] 
+    : null;
+    
+  // Get the assessment count
+  const assessmentCount = assessmentResults.length;
+  
+  // Get the mood entry count
+  const moodEntryCount = moodEntries.length;
 
   return (
-    <div className="container max-w-2xl mx-auto px-4 py-8 pb-20">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Your Profile</h1>
+    <div className="px-4 py-6 pb-20">
+      <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
       
-      <Card className="mb-8 shadow-md border-mindease-purple/20 overflow-hidden">
-        <div className="h-24 bg-gradient-to-r from-mindease-purple to-mindease-blue" />
-        <div className="flex justify-center -mt-12">
-          <div className="h-24 w-24 rounded-full bg-white shadow-md flex items-center justify-center text-3xl">
+      <Card className="mb-6 shadow-md border-mindease-purple/20 overflow-hidden">
+        <div className="h-16 bg-gradient-to-r from-mindease-purple to-mindease-blue" />
+        <div className="flex justify-center -mt-8">
+          <div className="h-16 w-16 rounded-full bg-white shadow-md flex items-center justify-center text-2xl">
             {currentUser?.displayName?.[0] || 'U'}
           </div>
         </div>
@@ -52,51 +68,8 @@ const Profile = () => {
         </CardHeader>
         
         {!isEditing ? (
-          <CardFooter className="flex justify-center gap-4">
+          <CardFooter className="flex justify-center">
             <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline">Account Settings</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Account Settings</DialogTitle>
-                  <DialogDescription>
-                    Manage your account settings and preferences.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="py-4 space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" value={currentUser?.email} disabled />
-                    <p className="text-xs text-muted-foreground">
-                      To change your email address, please contact support.
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Button variant="outline" className="w-full justify-start" disabled>
-                      Change Password
-                    </Button>
-                    <p className="text-xs text-muted-foreground">
-                      Password changes are disabled in this demo.
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label>Data & Privacy</Label>
-                    <Button variant="outline" className="w-full justify-start" disabled>
-                      Export Your Data
-                    </Button>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline">Close</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </CardFooter>
         ) : (
           <CardContent>
@@ -131,53 +104,91 @@ const Profile = () => {
         )}
       </Card>
       
-      <Card className="mb-8 shadow-md border-mindease-blue/20">
+      {/* Activity Summary */}
+      <Card className="mb-6 shadow-sm border-mindease-blue/20">
         <CardHeader>
-          <CardTitle>App Settings</CardTitle>
-          <CardDescription>Customize your MindEase experience</CardDescription>
+          <CardTitle>Activity Summary</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="notifications">Notifications</Label>
-              <p className="text-sm text-gray-500">Receive reminders to track your mood</p>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gray-50 p-4 rounded-md text-center">
+              <div className="text-2xl font-bold text-primary">{moodEntryCount}</div>
+              <div className="text-sm text-gray-500">Mood Entries</div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">Configure</Button>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="privacy">Privacy</Label>
-              <p className="text-sm text-gray-500">Manage your data and privacy settings</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">View</Button>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <Label htmlFor="theme">Theme</Label>
-              <p className="text-sm text-gray-500">Choose light or dark mode</p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm">Light</Button>
+            <div className="bg-gray-50 p-4 rounded-md text-center">
+              <div className="text-2xl font-bold text-primary">{assessmentCount}</div>
+              <div className="text-sm text-gray-500">Assessments</div>
             </div>
           </div>
         </CardContent>
       </Card>
       
-      <Card className="shadow-md border-mindease-green/20">
+      {/* Your Records */}
+      <Card className="mb-6 shadow-md">
         <CardHeader>
-          <CardTitle>About MindEase</CardTitle>
+          <CardTitle>Your Records</CardTitle>
+          <CardDescription>View your health tracking history</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Link to="/mood/calendar" className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+            <div className="flex items-center">
+              <div className="bg-mindease-blue/20 p-2 rounded-lg mr-3">
+                <Calendar className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-medium">Mood Calendar</p>
+                <p className="text-xs text-gray-500">View your mood history by date</p>
+              </div>
+            </div>
+          </Link>
+          
+          <Link to="/assessment-history" className="flex items-center justify-between p-3 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors">
+            <div className="flex items-center">
+              <div className="bg-mindease-purple/20 p-2 rounded-lg mr-3">
+                <BarChart className="h-5 w-5 text-purple-600" />
+              </div>
+              <div>
+                <p className="font-medium">Assessment History</p>
+                <p className="text-xs text-gray-500">Review your previous assessment results</p>
+              </div>
+            </div>
+          </Link>
+        </CardContent>
+      </Card>
+      
+      {/* Recent Assessment */}
+      {recentAssessment && (
+        <Card className="mb-6 shadow-sm border-mindease-purple/20">
+          <CardHeader>
+            <CardTitle>Latest Assessment</CardTitle>
+            <CardDescription>
+              {format(new Date(recentAssessment.timestamp), 'MMMM d, yyyy')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="font-medium">{recentAssessment.level}</p>
+                <p className="text-sm text-gray-500">Score: {recentAssessment.score}</p>
+              </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/assessment-history">View All</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* App Settings */}
+      <Card className="shadow-sm border-mindease-green/20">
+        <CardHeader>
+          <CardTitle>App Settings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Version</Label>
-              <p className="text-sm text-gray-500">1.0.0</p>
+              <Label>About MindEase</Label>
+              <p className="text-sm text-gray-500">Version 1.0.0</p>
             </div>
           </div>
           

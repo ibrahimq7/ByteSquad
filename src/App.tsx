@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { DataProvider } from "@/context/DataContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Layout from "@/components/Layout";
+import MobileLayout from "@/components/MobileLayout";
 
 // Pages
 import Home from "@/pages/Home";
@@ -18,6 +18,9 @@ import MoodTracker from "@/pages/MoodTracker";
 import Resources from "@/pages/Resources";
 import Profile from "@/pages/Profile";
 import NotFound from "@/pages/NotFound";
+import DailyTask from "@/pages/DailyTask";
+import MoodCalendar from "@/pages/MoodCalendar";
+import AssessmentHistory from "@/pages/AssessmentHistory";
 
 const queryClient = new QueryClient();
 
@@ -34,14 +37,14 @@ const App = () => (
               <Route path="/signup" element={<SignUp />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               
-              {/* Protected Routes */}
+              {/* Protected Routes - All using MobileLayout */}
               <Route
                 path="/"
                 element={
                   <ProtectedRoute>
-                    <Layout>
+                    <MobileLayout>
                       <Home />
-                    </Layout>
+                    </MobileLayout>
                   </ProtectedRoute>
                 }
               />
@@ -49,9 +52,9 @@ const App = () => (
                 path="/assessment"
                 element={
                   <ProtectedRoute>
-                    <Layout>
+                    <MobileLayout>
                       <Assessment />
-                    </Layout>
+                    </MobileLayout>
                   </ProtectedRoute>
                 }
               />
@@ -59,9 +62,19 @@ const App = () => (
                 path="/mood"
                 element={
                   <ProtectedRoute>
-                    <Layout>
+                    <MobileLayout>
                       <MoodTracker />
-                    </Layout>
+                    </MobileLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mood/calendar"
+                element={
+                  <ProtectedRoute>
+                    <MobileLayout>
+                      <MoodCalendar />
+                    </MobileLayout>
                   </ProtectedRoute>
                 }
               />
@@ -69,9 +82,9 @@ const App = () => (
                 path="/resources"
                 element={
                   <ProtectedRoute>
-                    <Layout>
+                    <MobileLayout>
                       <Resources />
-                    </Layout>
+                    </MobileLayout>
                   </ProtectedRoute>
                 }
               />
@@ -79,9 +92,29 @@ const App = () => (
                 path="/profile"
                 element={
                   <ProtectedRoute>
-                    <Layout>
+                    <MobileLayout>
                       <Profile />
-                    </Layout>
+                    </MobileLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/daily-task"
+                element={
+                  <ProtectedRoute>
+                    <MobileLayout>
+                      <DailyTask />
+                    </MobileLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assessment-history"
+                element={
+                  <ProtectedRoute>
+                    <MobileLayout>
+                      <AssessmentHistory />
+                    </MobileLayout>
                   </ProtectedRoute>
                 }
               />
